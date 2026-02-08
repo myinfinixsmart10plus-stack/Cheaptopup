@@ -33,7 +33,7 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* পেমেন্ট মেথড বাটন স্টাইল */
+        /* বড় নীল পেমেন্ট বাটন স্টাইল */
         .payment-method-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -103,23 +103,25 @@
             </button>
 
             <div class="step-card">
-                <h3 class="text-lg font-semibold mb-4 text-blue-300">১. প্লেয়ার আইডি দিন</h3>
+                <h3 class="text-lg font-semibold mb-4 text-blue-300"><span class="bg-blue-600 px-2 py-1 rounded mr-2 text-sm">১</span> প্লেয়ার আইডি দিন</h3>
                 <input type="text" id="playerID" placeholder="যেমন: 123456789" class="w-full p-3 rounded-lg bg-slate-900 border border-slate-700 focus:outline-none focus:border-blue-500 text-white outline-none">
             </div>
 
             <div class="step-card">
-                <h3 class="text-lg font-semibold mb-4 text-blue-300">২. প্যাকেজ সিলেক্ট করুন</h3>
+                <h3 class="text-lg font-semibold mb-4 text-blue-300"><span class="bg-blue-600 px-2 py-1 rounded mr-2 text-sm">২</span> প্যাকেজ সিলেক্ট করুন</h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="packageGrid">
                     <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '25 Diamonds', 20)"><p class="font-bold text-sm">25 Diamonds</p><p class="text-blue-400 text-xs">৳ ২০</p></div>
                     <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '50 Diamonds', 34)"><p class="font-bold text-sm">50 Diamonds</p><p class="text-blue-400 text-xs">৳ ৩৪</p></div>
                     <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '100 Diamonds', 67)"><p class="font-bold text-sm">100 Diamonds</p><p class="text-blue-400 text-xs">৳ ৬৭</p></div>
                     <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '115 Diamonds', 75)"><p class="font-bold text-sm">115 Diamonds</p><p class="text-blue-400 text-xs">৳ ৭৫</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '240 Diamonds', 150)"><p class="font-bold text-sm">240 Diamonds</p><p class="text-blue-400 text-xs">৳ ১৫০</p></div>
                     <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, 'Weekly', 145)"><p class="font-bold text-sm">Weekly</p><p class="text-blue-400 text-xs">৳ ১৪৫</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, 'Monthly', 745)"><p class="font-bold text-sm">Monthly</p><p class="text-blue-400 text-xs">৳ ৭৪৫</p></div>
                 </div>
             </div>
 
             <div class="step-card">
-                <h3 class="text-lg font-semibold mb-4 text-blue-300">৩. পেমেন্ট মেথড</h3>
+                <h3 class="text-lg font-semibold mb-4 text-blue-300"><span class="bg-blue-600 px-2 py-1 rounded mr-2 text-sm">৩</span> পেমেন্ট মেথড</h3>
                 <div class="payment-method-container">
                     <div class="blue-payment-card" onclick="openPayment('BKASH')">
                         <h4>BKASH</h4>
@@ -140,7 +142,9 @@
                 আমার অর্ডারসমূহ
             </h2>
             <div id="orderList" class="space-y-4">
-                <p class="text-slate-400 text-center py-10">অর্ডার দেখতে লগইন করুন।</p>
+                <div class="text-center py-10 bg-slate-800 rounded-2xl border border-dashed border-slate-600">
+                    <p class="text-slate-400">অর্ডার দেখতে লগইন করুন।</p>
+                </div>
             </div>
         </div>
 
@@ -190,8 +194,13 @@
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             const btn = document.getElementById('authBtn');
-            btn.innerText = user ? "লগআউট" : "লগইন";
-            if (user) loadUserOrders(user.uid);
+            if (user) {
+                btn.innerText = "লগআউট (" + user.displayName.split(' ')[0] + ")";
+                loadUserOrders(user.uid);
+            } else {
+                btn.innerText = "লগইন";
+                document.getElementById('orderList').innerHTML = '<p class="text-slate-400 text-center py-10">লগইন করুন</p>';
+            }
         });
 
         window.sendToFirebase = async function() {
@@ -213,21 +222,22 @@
                 alert("অর্ডার সফল!");
                 closeModal();
                 showPage('orderPage');
-            } catch (error) { alert("ত্রুটি!"); }
+            } catch (error) { alert("ত্রুটি হয়েছে!"); }
         }
 
         function loadUserOrders(uid) {
             const q = query(collection(db, "orders"), where("userId", "==", uid));
             onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('orderList');
-                list.innerHTML = "";
-                snapshot.forEach(doc => {
+                const orderList = document.getElementById('orderList');
+                orderList.innerHTML = "";
+                snapshot.forEach((doc) => {
                     const order = doc.data();
-                    const statusColor = order.status === "Completed" ? "text-green-500 border-green-500/30" : "text-yellow-500 border-yellow-500/30";
-                    list.innerHTML += `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between">
-                        <div><p class="font-bold text-sm">${order.package}</p><p class="text-xs text-slate-500">ID: ${order.playerId}</p></div>
-                        <span class="text-xs ${statusColor} px-2 py-1 rounded border self-center">${order.status}</span>
-                    </div>`;
+                    const statusColor = order.status === "Completed" ? "bg-green-600/20 text-green-500 border-green-600/30" : "bg-yellow-600/20 text-yellow-500 border-yellow-600/30";
+                    orderList.innerHTML += `
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                            <div><p class="text-xs text-slate-400">ID: ${order.playerId}</p><h4 class="font-bold text-sm">${order.package}</h4><p class="text-blue-400 text-xs">${order.trxId}</p></div>
+                            <div class="text-right"><p class="font-bold text-green-400 text-sm">৳ ${order.amount}</p><span class="text-[10px] ${statusColor} px-2 py-1 rounded border">${order.status}</span></div>
+                        </div>`;
                 });
             });
         }
@@ -240,9 +250,9 @@
             document.getElementById(pageId).classList.add('active-page');
             window.scrollTo(0,0);
         }
-        function selectPackage(el, name, price) {
-            document.querySelectorAll('.diamond-card').forEach(d => d.classList.remove('selected-pkg'));
-            el.classList.add('selected-pkg');
+        function selectPackage(element, name, price) {
+            document.querySelectorAll('.diamond-card').forEach(el => el.classList.remove('selected-pkg'));
+            element.classList.add('selected-pkg');
             selectedPkg = { name: name, price: price };
         }
         function openPayment(method) {
@@ -256,3 +266,4 @@
     </script>
 </body>
 </html>
+
