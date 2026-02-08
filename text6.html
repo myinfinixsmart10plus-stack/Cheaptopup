@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHEAP TOPUP | Gaming Top-up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .step-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .diamond-card { cursor: pointer; transition: all 0.3s; border: 1px solid #334155; }
+        .diamond-card:hover { border-color: #3b82f6; transform: translateY(-3px); }
+        .selected-pkg { border: 2px solid #3b82f6 !important; background: #1e3a8a !important; }
+        #paymentModal { display: none; }
+        .page-section { display: none; }
+        .active-page { display: block; }
+        nav b { cursor: pointer; }
+
+        /* FF টেক্সট লোগো স্টাইল */
+        .ff-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            font-size: 36px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* পেমেন্ট মেথড বাটন স্টাইল */
+        .payment-method-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .blue-payment-card {
+            background-color: #1e40af; 
+            border: 2px solid #3b82f6; 
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .blue-payment-card:hover {
+            background-color: #2563eb;
+            transform: scale(1.02);
+        }
+        .blue-payment-card h4 {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .blue-payment-card p {
+            color: #bfdbfe;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-blue-500 cursor-pointer" onclick="showPage('homePage')">CHEAP<span class="text-white">TOPUP</span></h1>
+            <div class="flex gap-5 text-sm items-center">
+                <b onclick="showPage('homePage')" class="hover:text-blue-400">হোম</b>
+                <b onclick="showPage('orderPage')" class="hover:text-blue-400">অর্ডারসমূহ</b>
+                <button id="authBtn" onclick="toggleAuth()" class="bg-blue-600 px-3 py-1 rounded text-xs font-bold">লগইন</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        
+        <div id="homePage" class="page-section active-page">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold mb-2 text-blue-400">গেম সিলেক্ট করুন</h2>
+                <p class="text-slate-400 text-sm">আপনার প্রিয় গেমটি বেছে নিন টপ-আপ করার জন্য</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 hover:border-blue-500 cursor-pointer transition-all text-center" onclick="showPage('topupPage')">
+                    <div class="ff-logo">FF</div>
+                    <h3 class="font-bold text-lg text-white">Free Fire</h3>
+                    <p class="text-blue-400 text-xs mt-1">ইন-গেম টপ-আপ</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="topupPage" class="page-section">
+            <button onclick="showPage('homePage')" class="mb-6 text-blue-400 flex items-center text-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                ফিরে যান
+            </button>
+
+            <div class="step-card">
+                <h3 class="text-lg font-semibold mb-4 text-blue-300">১. প্লেয়ার আইডি দিন</h3>
+                <input type="text" id="playerID" placeholder="যেমন: 123456789" class="w-full p-3 rounded-lg bg-slate-900 border border-slate-700 focus:outline-none focus:border-blue-500 text-white outline-none">
+            </div>
+
+            <div class="step-card">
+                <h3 class="text-lg font-semibold mb-4 text-blue-300">২. প্যাকেজ সিলেক্ট করুন</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="packageGrid">
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '25 Diamonds', 20)"><p class="font-bold text-sm">25 Diamonds</p><p class="text-blue-400 text-xs">৳ ২০</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '50 Diamonds', 34)"><p class="font-bold text-sm">50 Diamonds</p><p class="text-blue-400 text-xs">৳ ৩৪</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '100 Diamonds', 67)"><p class="font-bold text-sm">100 Diamonds</p><p class="text-blue-400 text-xs">৳ ৬৭</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, '115 Diamonds', 75)"><p class="font-bold text-sm">115 Diamonds</p><p class="text-blue-400 text-xs">৳ ৭৫</p></div>
+                    <div class="diamond-card p-4 bg-slate-900 rounded-xl text-center" onclick="selectPackage(this, 'Weekly', 145)"><p class="font-bold text-sm">Weekly</p><p class="text-blue-400 text-xs">৳ ১৪৫</p></div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3 class="text-lg font-semibold mb-4 text-blue-300">৩. পেমেন্ট মেথড</h3>
+                <div class="payment-method-container">
+                    <div class="blue-payment-card" onclick="openPayment('BKASH')">
+                        <h4>BKASH</h4>
+                        <p>বিকাশ পেমেন্ট</p>
+                    </div>
+                    <div class="blue-payment-card" onclick="openPayment('NAGAD')">
+                        <h4>NAGAD</h4>
+                        <p>নগদ পেমেন্ট</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="openPayment()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg mt-4">অর্ডার করুন</button>
+        </div>
+
+        <div id="orderPage" class="page-section">
+            <h2 class="text-xl font-bold mb-6 flex items-center text-blue-400">
+                আমার অর্ডারসমূহ
+            </h2>
+            <div id="orderList" class="space-y-4">
+                <p class="text-slate-400 text-center py-10">অর্ডার দেখতে লগইন করুন।</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-6 rounded-2xl max-w-md w-full border border-blue-500">
+            <h2 id="modalMethodName" class="text-2xl font-bold text-center mb-4 text-blue-500">পেমেন্ট</h2>
+            <div class="bg-slate-900 p-4 rounded-lg mb-4 text-center">
+                <p class="text-sm mb-2 text-gray-300">নিচের নাম্বারে <span class="text-blue-400 font-bold">Send Money</span> করুন:</p>
+                <p class="text-2xl font-mono bg-black py-2 rounded border border-dashed text-yellow-500">01928538139</p>
+                <p class="mt-3">মোট টাকা: <span id="finalAmount" class="text-green-400 font-bold">৳ ০</span></p>
+            </div>
+            <input type="text" id="trxID" placeholder="TrxID দিন (যেমন: 9H8K2L5M)" class="w-full p-3 rounded bg-slate-700 border-none mb-4 focus:ring-2 focus:ring-blue-500 text-white outline-none">
+            <button id="submitBtn" onclick="sendToFirebase()" class="w-full bg-blue-600 py-3 rounded-lg font-bold hover:bg-blue-700">অর্ডার কনফার্ম করুন</button>
+            <button onclick="closeModal()" class="w-full mt-3 text-slate-400 text-sm">ফিরে যান</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALDAknjL6CkKfd4_6EDJBS2jOwzcSD6K4",
+            authDomain: "cheap-topup-9b6d4.firebaseapp.com",
+            projectId: "cheap-topup-9b6d4",
+            storageBucket: "cheap-topup-9b6d4.firebasestorage.app",
+            messagingSenderId: "502515608486",
+            appId: "1:502515608486:web:b4b166f3c61984f567bd67",
+            measurementId: "G-KEW0L1XS7Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+
+        window.toggleAuth = function() {
+            if (currentUser) signOut(auth);
+            else signInWithPopup(auth, provider).catch(err => alert("লগইন ব্যর্থ!"));
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const btn = document.getElementById('authBtn');
+            btn.innerText = user ? "লগআউট" : "লগইন";
+            if (user) loadUserOrders(user.uid);
+        });
+
+        window.sendToFirebase = async function() {
+            if (!currentUser) return alert("আগে লগইন করুন!");
+            const trx = document.getElementById('trxID').value;
+            const pID = document.getElementById('playerID').value;
+            if(!trx) return alert("TrxID দিন!");
+            
+            try {
+                await addDoc(collection(db, "orders"), {
+                    userId: currentUser.uid,
+                    playerId: pID,
+                    package: selectedPkg.name,
+                    amount: selectedPkg.price,
+                    trxId: trx,
+                    status: "Pending",
+                    timestamp: serverTimestamp()
+                });
+                alert("অর্ডার সফল!");
+                closeModal();
+                showPage('orderPage');
+            } catch (error) { alert("ত্রুটি!"); }
+        }
+
+        function loadUserOrders(uid) {
+            const q = query(collection(db, "orders"), where("userId", "==", uid));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('orderList');
+                list.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    const statusColor = order.status === "Completed" ? "text-green-500 border-green-500/30" : "text-yellow-500 border-yellow-500/30";
+                    list.innerHTML += `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between">
+                        <div><p class="font-bold text-sm">${order.package}</p><p class="text-xs text-slate-500">ID: ${order.playerId}</p></div>
+                        <span class="text-xs ${statusColor} px-2 py-1 rounded border self-center">${order.status}</span>
+                    </div>`;
+                });
+            });
+        }
+    </script>
+
+    <script>
+        let selectedPkg = { name: '', price: 0 };
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            window.scrollTo(0,0);
+        }
+        function selectPackage(el, name, price) {
+            document.querySelectorAll('.diamond-card').forEach(d => d.classList.remove('selected-pkg'));
+            el.classList.add('selected-pkg');
+            selectedPkg = { name: name, price: price };
+        }
+        function openPayment(method) {
+            const pID = document.getElementById('playerID').value;
+            if(!pID || !selectedPkg.name) return alert("আইডি এবং প্যাকেজ সিলেক্ট করুন!");
+            if(method) document.getElementById('modalMethodName').innerText = method + " পেমেন্ট";
+            document.getElementById('finalAmount').innerText = "৳ " + selectedPkg.price;
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('paymentModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
